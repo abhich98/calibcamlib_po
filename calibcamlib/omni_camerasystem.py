@@ -1,16 +1,16 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as R
-from calipy_lib import SphericalCamera
-from calipy_lib.helper import intersect, get_line_dist
+from calibcamlib import OmniCamera
+from calibcamlib.helper import intersect, get_line_dist
 
 
 # R,t are world->cam
-class OmniCameraSystem:
+class OmniCamerasystem:
     def __init__(self):
         self.cameras = list()
 
     def add_camera(self, K, xi, D, rotmat, t):
-        self.cameras.append({'camera': SphericalCamera(K, xi, D), 'R': rotmat, 't': t})
+        self.cameras.append({'camera': OmniCamera(K, xi, D), 'R': rotmat, 't': t})
 
     def project(self, X, offsets=None):
         if offsets is None:
@@ -139,7 +139,7 @@ class OmniCameraSystem:
 
     @staticmethod
     def from_calibcam_file(filename: str):
-        cs = OmniCameraSystem()
+        cs = OmniCamerasystem()
         calib = np.load(filename, allow_pickle=True)[()]
 
         for i in range(len(calib['RX1_fit'])):
@@ -160,12 +160,12 @@ class OmniCameraSystem:
 
     @staticmethod
     def from_calibs(calibs):
-        cs = OmniCameraSystem()
+        cs = OmniCamerasystem()
 
         for calib in calibs:
-            cs.add_camera(calib['K'],
+            cs.add_camera(calib['A'] if 'A' in calib else calib['K'],
                           calib['xi'],
-                          calib['D'],
+                          calib['k'] if 'k' in calib else calib['D'],
                           R.from_rotvec(calib['rvec_cam'].reshape((3,))).as_matrix(),
                           calib['tvec_cam'].reshape(1, 3)
                           )

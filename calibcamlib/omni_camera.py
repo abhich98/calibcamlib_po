@@ -12,7 +12,7 @@ class OmniCamera:
 
         self.K = K.reshape(3, 3)
         self.xi = xi
-        self.D = D.reshape(4)
+        self.D = np.asarray(D).squeeze()[:4]
         self.offset = offset
 
     def space_to_sensor(self, X, offset=None):
